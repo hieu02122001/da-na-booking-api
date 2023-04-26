@@ -4,10 +4,11 @@ const cors = require('cors');
 require('./models/database/mongoose');
 // Router
 const userRouter = require('./routers/web-user-manager');
-const buildingRouter = require('./routers/web-building-manager');
+const houseRouter = require('./routers/web-house-manager');
 const roomRouter = require('./routers/web-room-manager');
-const tenantRouter = require('./routers/web-tenant-manager');
-const contractRouter = require('./routers/web-contract-manager');
+const bookingRouter = require('./routers/web-booking-manager');
+const subscriptionRouter = require('./routers/web-subscription-manager');
+const packageRouter = require('./routers/web-package-manager');
 //
 const { PORT, PATH } = require('./utils');
 const app = express();
@@ -15,10 +16,11 @@ app.use(cors());
 app.use(express.json());
 //
 app.use(userRouter);
-app.use(buildingRouter);
+app.use(houseRouter);
 app.use(roomRouter);
-app.use(tenantRouter);
-app.use(contractRouter);
+app.use(bookingRouter);
+app.use(subscriptionRouter);
+app.use(packageRouter);
 // Check
 app.get(PATH + '/check', async (req, res) => {
   res.send({ msg: 'OK'});
