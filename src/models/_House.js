@@ -15,6 +15,7 @@ const houseSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
+    required: true,
   },
   description: {
     type: String,
@@ -42,15 +43,6 @@ const houseSchema = new mongoose.Schema({
 });
 // # Methods
 
-//
-houseSchema.methods.toJSON = function () {
-  const OMIT_FIELDS = [];
-  //
-  const house = this;
-  const houseObj = lodash.omit(house, OMIT_FIELDS);
-  //
-  return houseObj;
-}
 // # Middle-wares
 //
 houseSchema.pre('save', async function (next) {
