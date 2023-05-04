@@ -1,3 +1,5 @@
+const slugify = require('slugify');
+
 const PORT = 4000;
 const PATH = '/api';
 const HASH_TIMES = 8;

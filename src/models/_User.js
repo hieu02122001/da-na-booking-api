@@ -9,6 +9,7 @@ const { slug } = require('../utils');
 const userSchema = new mongoose.Schema({
   userName: {
     type: String,
+    unique: true,
     required: true,
     trim: true,
   },
@@ -83,14 +84,14 @@ userSchema.statics.findByCredentials = async (userName, password, more) => {
   return user;
 }
 //
-userSchema.methods.toJSON = function () {
-  const OMIT_FIELDS = [];
-  //
-  const user = this;
-  const userObj = lodash.omit(user, OMIT_FIELDS);
-  //
-  return userObj;
-}
+// userSchema.methods.toJSON = function () {
+//   const OMIT_FIELDS = ["password"];
+//   //
+//   const user = this;
+//   const userObj = lodash.omit(user, OMIT_FIELDS);
+//   //
+//   return userObj;
+// }
 // # Middle-wares
 //
 userSchema.pre('save', async function (next) {
