@@ -75,6 +75,8 @@ this.updateHouse = async function (houseId, houseObj, more) {
     throw new Error(`Not found house with id [${houseId}]!`);
   }
   //
+  await house.save();
+  //
   return house;
 }
 

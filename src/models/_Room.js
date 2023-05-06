@@ -15,6 +15,7 @@ const roomSchema = new mongoose.Schema({
   houseId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'House',
+    required: true,
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -25,6 +26,8 @@ const roomSchema = new mongoose.Schema({
   },
   price: {
     type: Number,
+    required: true,
+    default: 0,
   },
   isDeleted: {
     type: Boolean,
@@ -36,15 +39,6 @@ const roomSchema = new mongoose.Schema({
 });
 // # Methods
 
-//
-roomSchema.methods.toJSON = function () {
-  const OMIT_FIELDS = [];
-  //
-  const room = this;
-  const roomObj = lodash.omit(room, OMIT_FIELDS);
-  //
-  return roomObj;
-}
 // # Middle-wares
 //
 roomSchema.pre('save', async function (next) {

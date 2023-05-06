@@ -94,6 +94,8 @@ this.updateUser = async function (userId, userObj, more) {
     await user.save();
   }
   //
+  await user.save();
+  //
   return user;
 }
 
