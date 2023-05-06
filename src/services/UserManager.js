@@ -112,7 +112,7 @@ this.deleteUser = async function(userId, more) {
 };
 
 this.removeUser = async function(userId, more) {
-  const user = await User.findOneAndRemove(userId);
+  const user = await User.findByIdAndRemove(userId);
   //
   if (!user) {
     throw new Error(`Not found user with id [${userId}]!`);

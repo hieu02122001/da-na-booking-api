@@ -99,7 +99,7 @@ this.deleteRoom = async function(roomId, more) {
 };
 
 this.removeRoom = async function(roomId, more) {
-  const room = await Room.findOneAndRemove(roomId);
+  const room = await Room.findByIdAndRemove(roomId);
   //
   if (!room) {
     throw new Error(`Not found room with id [${roomId}]!`);

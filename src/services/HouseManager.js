@@ -93,7 +93,7 @@ this.deleteHouse = async function(houseId, more) {
 };
 
 this.removeHouse = async function(houseId, more) {
-  const house = await House.findOneAndRemove(houseId);
+  const house = await House.findByIdAndRemove(houseId);
   //
   if (!house) {
     throw new Error(`Not found house with id [${houseId}]!`);
