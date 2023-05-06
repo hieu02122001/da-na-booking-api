@@ -23,21 +23,17 @@ const subsSchema = new mongoose.Schema({
   totalPrice: {
     type: Number,
     required: true
+  },
+  status: {
+    type: String,
+    enum: ['READY', 'RUNNING', 'DONE', "CANCELED"],
+    default: "READY"
   }
 }, {
   timestamps: true,
 });
 // # Methods
 
-//
-subsSchema.methods.toJSON = function () {
-  const OMIT_FIELDS = [];
-  //
-  const subs = this;
-  const subsObj = lodash.omit(subs, OMIT_FIELDS);
-  //
-  return subsObj;
-}
 // # Middle-wares
 
 //

@@ -7,10 +7,12 @@ const bookingSchema = new mongoose.Schema({
   roomId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Room',
+    required: true,
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
+    required: true,
   },
   checkInDate: {
     type: Date,
@@ -23,20 +25,16 @@ const bookingSchema = new mongoose.Schema({
   totalPrice: {
     type: Number,
   },
+  status: {
+    type: String,
+    enum: ['READY', 'RUNNING', 'DONE', "CANCELED"],
+    default: "READY"
+  }
 }, {
   timestamps: true,
 });
 // # Methods
 
-//
-bookingSchema.methods.toJSON = function () {
-  const OMIT_FIELDS = [];
-  //
-  const booking = this;
-  const bookingObj = lodash.omit(booking, OMIT_FIELDS);
-  //
-  return bookingObj;
-}
 // # Middle-wares
 
 //
