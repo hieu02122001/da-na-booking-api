@@ -7,10 +7,17 @@ const subsSchema = new mongoose.Schema({
   houseId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'House',
+    required: true,
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
   },
   packageId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Package',
+    required: true,
   },
   beginDate: {
     type: Date,
