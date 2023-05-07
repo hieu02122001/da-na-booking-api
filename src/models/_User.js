@@ -7,18 +7,6 @@ const { HASH_TIMES } = require('../utils');
 const { slug } = require('../utils');
 //
 const userSchema = new mongoose.Schema({
-  userName: {
-    type: String,
-    unique: true,
-    required: true,
-    trim: true,
-  },
-  password: {
-    type: String,
-    required: true,
-    trim: true,
-    minlength: 6,
-  },
   fullName: {
     type: String,
     required: true,
@@ -43,18 +31,16 @@ const userSchema = new mongoose.Schema({
       }
     }
   },
+  password: {
+    type: String,
+    required: true,
+    trim: true,
+    minlength: 6,
+  },
   userType: {
     type:String,
     enum: ['ADMIN', 'LANDLORD', 'TENANT'],
     required: true,
-  },
-  houseId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'House',
-  },
-  roomId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Room',
   },
   isDeleted: {
     type: Boolean,
