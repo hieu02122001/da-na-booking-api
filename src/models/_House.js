@@ -20,6 +20,10 @@ const houseSchema = new mongoose.Schema({
   description: {
     type: String,
   },
+  district: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'District',
+  },
   address: {
     type: String,
     required: true,
