@@ -54,9 +54,11 @@ const userSchema = new mongoose.Schema({
   timestamps: true,
 });
 // # Methods
-userSchema.statics.findByCredentials = async (userName, password, more) => {
+userSchema.statics.findByCredentials = async (email, password, more) => {
+  const { userType } = more;
   const user = await User.findOne({ 
-    userName,
+    email,
+    userType
   });
   if (!user) {
     throw new Error('This user name doesn\'t exist!');

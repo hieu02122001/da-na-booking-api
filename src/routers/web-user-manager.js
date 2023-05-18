@@ -5,6 +5,7 @@ const router = new express.Router();
 const UserManager = require('../services/UserManager');
 //
 const { PATH } = require('../utils');
+const { User } = require('../models/_User');
 //
 router.get(PATH + '/users', async (req, res) => {
   const { query } = req;
@@ -63,7 +64,20 @@ router.delete(PATH + '/users/:id', async (req, res) => {
   }
 });
 // ADMIN
-
+router.post(PATH + '/users/admin/login', async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await User.findByCredentials(email, password, { userType: "ADMIN" });
+    //
+    const token = await UserManager.generateAuthToken(user._id);
+    user.token = token;
+    await user.save();
+    //
+    res.send({ user, token });
+  } catch (error) {
+    res.status(400).send({ message: error.message });
+  }
+});
 // LANDLORD
 
 // CLIENT

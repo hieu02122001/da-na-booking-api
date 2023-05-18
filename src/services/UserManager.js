@@ -71,7 +71,7 @@ this.wrapExtraToUser = async function(userObj, more) {
   // id
   userObj.id = lodash.get(userObj, "_id").toString();
   //
-  return lodash.omit(userObj, ["_id", "password"]);
+  return lodash.omit(userObj, ["_id", "password", "token"]);
 };
 
 this.createUser = async function (userObj, more) {
@@ -119,6 +119,17 @@ this.removeUser = async function(userId, more) {
   }
   //
   return user;
+};
+//
+this.generateAuthToken = async function(userId, more) {
+  const user = await this.getUser(userId);
+  const AUTH_KEY = 'dana-booking';
+  //
+  const token = jwt.sign({
+  ...user
+  }, AUTH_KEY);
+  //
+  return token;
 };
 //
 module.exports = this
