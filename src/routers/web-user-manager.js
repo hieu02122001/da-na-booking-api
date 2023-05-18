@@ -73,12 +73,52 @@ router.post(PATH + '/users/admin/login', async (req, res) => {
     user.token = token;
     await user.save();
     //
-    res.send({ user, token });
+    const userObj = user.toJSON();
+    userObj.id = userObj._id;
+    lodash.unset(userObj, '_id');
+    //
+    res.send({ user: userObj, token });
   } catch (error) {
     res.status(400).send({ message: error.message });
   }
 });
 // LANDLORD
-
+router.post(PATH + '/users/landlord/login', async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await User.findByCredentials(email, password, { userType: "LANDLORD" });
+    //
+    const token = await UserManager.generateAuthToken(user._id);
+    user.token = token;
+    await user.save();
+    //
+    const userObj = user.toJSON();
+    userObj.id = userObj._id;
+    lodash.unset(userObj, '_id');
+    //
+    res.send({ user: userObj, token });
+  } catch (error) {
+    res.status(400).send({ message: error.message });
+  }
+});
 // CLIENT
+router.post(PATH + '/users/client/login', async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await User.findByCredentials(email, password, { userType: "CLIENT" });
+    //
+    const token = await UserManager.generateAuthToken(user._id);
+    user.token = token;
+    await user.save();
+    //
+    const userObj = user.toJSON();
+    userObj.id = userObj._id;
+    lodash.unset(userObj, '_id');
+    //
+    res.send({ user: userObj, token });
+  } catch (error) {
+    res.status(400).send({ message: error.message });
+  }
+});
+//
 module.exports = router;
