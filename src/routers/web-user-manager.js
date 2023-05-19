@@ -4,6 +4,7 @@ const router = new express.Router();
 
 const UserManager = require('../services/UserManager');
 //
+const { auth } = require('../middleware/auth');
 const { PATH } = require('../utils');
 const { User } = require('../models/_User');
 //
@@ -25,6 +26,18 @@ router.get(PATH + '/users/:id', async (req, res) => {
     //
     res.send(user);
   } catch(error) {
+    res.status(400).send({ message: error.message });
+  }
+});
+//
+//
+router.get(PATH + '/me', auth, async (req, res) => {
+  const id = req.user._id;
+  try {
+    const result = await UserManager.getUser(id);
+    //
+    res.send(result);
+  } catch (error) {
     res.status(400).send({ message: error.message });
   }
 });
