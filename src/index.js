@@ -10,10 +10,12 @@ const bookingRouter = require('./routers/web-booking-manager');
 const subscriptionRouter = require('./routers/web-subscription-manager');
 const packageRouter = require('./routers/web-package-manager');
 //
+const { logger } = require('./middleware/logger');
 const { PORT, PATH } = require('./utils');
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(logger);
 //
 app.use(userRouter);
 app.use(houseRouter);
