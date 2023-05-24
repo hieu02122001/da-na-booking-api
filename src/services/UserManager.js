@@ -11,9 +11,9 @@ this.findUsers = async function(criteria, more) {
   };
   // Build query
   // Role
-  const role = lodash.get(criteria, "role");
-  if(role) {
-    lodash.set(queryObj, "role", role);
+  const userType = lodash.get(criteria, "userType");
+  if(userType) {
+    lodash.set(queryObj, "userType", userType);
   }
   // House Id
   const houseId = lodash.get(criteria, "houseId");

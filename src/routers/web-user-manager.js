@@ -30,7 +30,6 @@ router.get(PATH + '/users/:id', async (req, res) => {
   }
 });
 //
-//
 router.get(PATH + '/me', auth, async (req, res) => {
   const id = req.user._id;
   try {
@@ -91,6 +90,17 @@ router.post(PATH + '/users/admin/login', async (req, res) => {
     lodash.unset(userObj, '_id');
     //
     res.send({ user: userObj, token });
+  } catch (error) {
+    res.status(400).send({ message: error.message });
+  }
+});
+
+router.get(PATH + '/admin/users', async (req, res) => {
+  const { query } = req;
+  try {
+    const result = await UserManager.findUsers(query);
+    //
+    res.send(result);
   } catch (error) {
     res.status(400).send({ message: error.message });
   }
