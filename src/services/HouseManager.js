@@ -1,30 +1,28 @@
-const lodash = require('lodash');
-const { House } = require('../models/_House');
-const { mongoose } = require('mongoose');
-const { slug } = require('../utils');
-const moment = require('moment');
+const lodash = require("lodash");
+const { House } = require("../models/_House");
+const { User } = require("../models/_User");
+const { District } = require("../models/_District");
+const { mongoose } = require("mongoose");
+const { slug, formatDate } = require("../utils");
 
-this.findHouses = async function(criteria, more) {
+this.findHouses = async function (criteria, more) {
   const queryObj = {
-    isDeleted: false
+    isDeleted: false,
   };
   // Build query
   // User Id
   const userId = lodash.get(criteria, "userId");
-  if(mongoose.Types.ObjectId.isValid(userId)) {
+  if (mongoose.Types.ObjectId.isValid(userId)) {
     lodash.set(queryObj, "userId", mongoose.Types.ObjectId(userId));
   }
   // Search: slug
   let searchInfo = lodash.get(criteria, "search");
-  if(searchInfo) {
+  if (searchInfo) {
     searchInfo = slug(searchInfo);
-    lodash.set(queryObj, "$or", [
-      { "slug": { "$regex": searchInfo } },
-    ])
+    lodash.set(queryObj, "$or", [{ slug: { $regex: searchInfo } }]);
   }
   //
-  const houses = await House.find(queryObj)
-  .sort([['createdAt', -1]]);
+  const houses = await House.find(queryObj).sort([["createdAt", -1]]);
   //
   for (let i = 0; i < houses.length; i++) {
     houses[i] = await this.wrapExtraToHouse(houses[i].toJSON(), more);
@@ -32,7 +30,7 @@ this.findHouses = async function(criteria, more) {
   // pagination
   const DEFAULT_LIMIT = 6;
   const page = lodash.get(criteria, "page") || 1;
-  const _start = DEFAULT_LIMIT * (page -1);
+  const _start = DEFAULT_LIMIT * (page - 1);
   const _end = DEFAULT_LIMIT * page;
   const paginatedHouses = lodash.slice(houses, _start, _end);
   //
@@ -40,9 +38,9 @@ this.findHouses = async function(criteria, more) {
     count: houses.length,
     page: page,
     rows: paginatedHouses,
-  }
+  };
   return output;
-}
+};
 
 this.getHouse = async function (houseId, more) {
   const house = await House.findById(houseId);
@@ -54,9 +52,18 @@ this.getHouse = async function (houseId, more) {
   return this.wrapExtraToHouse(house.toJSON(), more);
 };
 
-this.wrapExtraToHouse = async function(houseObj, more) {
+this.wrapExtraToHouse = async function (houseObj, more) {
   // id
   houseObj.id = lodash.get(houseObj, "_id").toString();
+  // Date
+  houseObj.createdAt = formatDate(houseObj.createdAt);
+  houseObj.updatedAt = formatDate(houseObj.updatedAt);
+  // user
+  const user = await User.findById(houseObj.userId);
+  houseObj.owner = lodash.pick(user, "fullName");
+  // district
+  const district = await District.findById(houseObj.district);
+  houseObj.district = lodash.pick(district, "name");
   //
   return lodash.omit(houseObj, ["_id"]);
 };
@@ -66,10 +73,13 @@ this.createHouse = async function (houseObj, more) {
   await house.save();
   //
   return house;
-}
+};
 
 this.updateHouse = async function (houseId, houseObj, more) {
-  const house = await House.findByIdAndUpdate(houseId, houseObj, { new: true, runValidators: true });
+  const house = await House.findByIdAndUpdate(houseId, houseObj, {
+    new: true,
+    runValidators: true,
+  });
   //
   if (!house) {
     throw new Error(`Not found house with id [${houseId}]!`);
@@ -78,12 +88,16 @@ this.updateHouse = async function (houseId, houseObj, more) {
   await house.save();
   //
   return house;
-}
+};
 
-this.deleteHouse = async function(houseId, more) {
-  const house = await House.findByIdAndUpdate(houseId, {
-    isDeleted: true
-  }, { new: true });
+this.deleteHouse = async function (houseId, more) {
+  const house = await House.findByIdAndUpdate(
+    houseId,
+    {
+      isDeleted: true,
+    },
+    { new: true }
+  );
   //
   if (!house) {
     throw new Error(`Not found house with id [${houseId}]!`);
@@ -92,7 +106,7 @@ this.deleteHouse = async function(houseId, more) {
   return house;
 };
 
-this.removeHouse = async function(houseId, more) {
+this.removeHouse = async function (houseId, more) {
   const house = await House.findByIdAndRemove(houseId);
   //
   if (!house) {
@@ -102,4 +116,4 @@ this.removeHouse = async function(houseId, more) {
   return house;
 };
 //
-module.exports = this
+module.exports = this;
