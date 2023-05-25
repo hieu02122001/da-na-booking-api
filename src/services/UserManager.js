@@ -1,5 +1,6 @@
 const lodash = require("lodash");
 const { User } = require("../models/_User");
+const { House } = require("../models/_House");
 const jwt = require("jsonwebtoken");
 const { mongoose } = require("mongoose");
 const { slug, formatDate } = require("../utils");
@@ -71,6 +72,14 @@ this.wrapExtraToUser = async function (userObj, more) {
   // Date
   userObj.createdAt = formatDate(userObj.createdAt);
   userObj.updatedAt = formatDate(userObj.updatedAt);
+  //
+  if (more && more.withHouses === true) {
+    const houses = await House.find({
+      userId: userObj.id,
+      isDeleted: false,
+    }).sort([["createdAt", -1]]);
+    userObj.houses = houses;
+  }
   //
   return lodash.omit(userObj, ["_id", "password", "token"]);
 };

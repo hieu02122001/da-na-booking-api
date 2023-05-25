@@ -1,14 +1,14 @@
-const express = require('express');
-const lodash = require('lodash');
+const express = require("express");
+const lodash = require("lodash");
 const router = new express.Router();
 
-const UserManager = require('../services/UserManager');
+const UserManager = require("../services/UserManager");
 //
-const { auth } = require('../middleware/auth');
-const { PATH } = require('../utils');
-const { User } = require('../models/_User');
+const { auth } = require("../middleware/auth");
+const { PATH } = require("../utils");
+const { User } = require("../models/_User");
 //
-router.get(PATH + '/users', async (req, res) => {
+router.get(PATH + "/users", async (req, res) => {
   const { query } = req;
   try {
     const result = await UserManager.findUsers(query);
@@ -19,18 +19,18 @@ router.get(PATH + '/users', async (req, res) => {
   }
 });
 //
-router.get(PATH + '/users/:id', async (req, res) => {
+router.get(PATH + "/users/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const user = await UserManager.getUser(id);
     //
     res.send(user);
-  } catch(error) {
+  } catch (error) {
     res.status(400).send({ message: error.message });
   }
 });
 //
-router.get(PATH + '/me', auth, async (req, res) => {
+router.get(PATH + "/me", auth, async (req, res) => {
   const id = req.user._id;
   try {
     const result = await UserManager.getUser(id);
@@ -41,10 +41,10 @@ router.get(PATH + '/me', auth, async (req, res) => {
   }
 });
 //
-router.post(PATH + '/users', async (req, res) => {
+router.post(PATH + "/users", async (req, res) => {
   const { body } = req;
   try {
-    const result = await UserManager.createUser(body)
+    const result = await UserManager.createUser(body);
     //
     res.send(result);
   } catch (error) {
@@ -52,34 +52,36 @@ router.post(PATH + '/users', async (req, res) => {
   }
 });
 //
-router.put(PATH + '/users/:id', async (req, res) => {
+router.put(PATH + "/users/:id", async (req, res) => {
   const { body, params } = req;
   //
   try {
     const user = await UserManager.updateUser(params.id, body);
     //
     res.send(user);
-  } catch(error) {
+  } catch (error) {
     res.status(400).send({ message: error.message });
   }
 });
 //
-router.delete(PATH + '/users/:id', async (req, res) => {
+router.delete(PATH + "/users/:id", async (req, res) => {
   const { id } = req.params;
   //
   try {
     const user = await UserManager.deleteUser(id);
     //
     res.send(user);
-  } catch(error) {
+  } catch (error) {
     res.status(400).send({ message: error.message });
   }
 });
 // ADMIN -------------------------------------------------------------------------------------------------------------------
-router.post(PATH + '/admin/users/login', async (req, res) => {
+router.post(PATH + "/admin/users/login", async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await User.findByCredentials(email, password, { userType: "ADMIN" });
+    const user = await User.findByCredentials(email, password, {
+      userType: "ADMIN",
+    });
     //
     const token = await UserManager.generateAuthToken(user._id);
     user.token = token;
@@ -87,7 +89,7 @@ router.post(PATH + '/admin/users/login', async (req, res) => {
     //
     const userObj = user.toJSON();
     userObj.id = userObj._id;
-    lodash.unset(userObj, '_id');
+    lodash.unset(userObj, "_id");
     //
     res.send({ user: userObj, token });
   } catch (error) {
@@ -95,10 +97,13 @@ router.post(PATH + '/admin/users/login', async (req, res) => {
   }
 });
 //
-router.get(PATH + '/admin/users', auth, async (req, res) => {
+router.get(PATH + "/admin/users", auth, async (req, res) => {
   const { query } = req;
   try {
-    const result = await UserManager.findUsers(query);
+    lodash.set(query, "userType", "LANDLORD");
+    //
+    const more = { withHouses: true };
+    const result = await UserManager.findUsers(query, more);
     //
     res.send(result);
   } catch (error) {
@@ -107,55 +112,59 @@ router.get(PATH + '/admin/users', auth, async (req, res) => {
 });
 //
 //
-router.get(PATH + '/admin/users/:id', auth, async (req, res) => {
+router.get(PATH + "/admin/users/:id", auth, async (req, res) => {
   const { id } = req.params;
   try {
-    const user = await UserManager.getUser(id);
+    const more = { withHouses: true };
+    const user = await UserManager.getUser(id, more);
     //
     res.send(user);
-  } catch(error) {
+  } catch (error) {
     res.status(400).send({ message: error.message });
   }
 });
 //
-router.post(PATH + '/admin/users', auth, async (req, res) => {
+router.post(PATH + "/admin/users", auth, async (req, res) => {
   const { body } = req;
   try {
-    const result = await UserManager.createUser(body)
+    lodash.set(body, "userType", "LANDLORD");
+    const result = await UserManager.createUser(body);
     //
     res.send(result);
   } catch (error) {
     res.status(400).send({ message: error.message });
   }
 });
-router.put(PATH + '/admin/users/:id', auth, async (req, res) => {
+router.put(PATH + "/admin/users/:id", auth, async (req, res) => {
   const { body, params } = req;
   //
   try {
     const user = await UserManager.updateUser(params.id, body);
     //
     res.send(user);
-  } catch(error) {
+  } catch (error) {
     res.status(400).send({ message: error.message });
   }
 });
 //
-router.delete(PATH + '/admin/users/:id', auth, async (req, res) => {
+router.delete(PATH + "/admin/users/:id", auth, async (req, res) => {
   const { id } = req.params;
   //
   try {
     const user = await UserManager.deleteUser(id);
     //
     res.send(user);
-  } catch(error) {
+  } catch (error) {
     res.status(400).send({ message: error.message });
   }
 });
 // LANDLORD -------------------------------------------------------------------------------------------------------------------
-router.post(PATH + '/users/landlord/login', async (req, res) => {
+router.post(PATH + "/users/landlord/login", async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await User.findByCredentials(email, password, { userType: "LANDLORD" });
+    const user = await User.findByCredentials(email, password, {
+      userType: "LANDLORD",
+    });
     //
     const token = await UserManager.generateAuthToken(user._id);
     user.token = token;
@@ -163,7 +172,7 @@ router.post(PATH + '/users/landlord/login', async (req, res) => {
     //
     const userObj = user.toJSON();
     userObj.id = userObj._id;
-    lodash.unset(userObj, '_id');
+    lodash.unset(userObj, "_id");
     //
     res.send({ user: userObj, token });
   } catch (error) {
@@ -171,10 +180,12 @@ router.post(PATH + '/users/landlord/login', async (req, res) => {
   }
 });
 // CLIENT -------------------------------------------------------------------------------------------------------------------
-router.post(PATH + '/users/client/login', async (req, res) => {
+router.post(PATH + "/users/client/login", async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await User.findByCredentials(email, password, { userType: "CLIENT" });
+    const user = await User.findByCredentials(email, password, {
+      userType: "CLIENT",
+    });
     //
     const token = await UserManager.generateAuthToken(user._id);
     user.token = token;
@@ -182,7 +193,7 @@ router.post(PATH + '/users/client/login', async (req, res) => {
     //
     const userObj = user.toJSON();
     userObj.id = userObj._id;
-    lodash.unset(userObj, '_id');
+    lodash.unset(userObj, "_id");
     //
     res.send({ user: userObj, token });
   } catch (error) {
