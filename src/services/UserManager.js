@@ -35,13 +35,28 @@ this.findUsers = async function (criteria, more) {
       { email: { $regex: searchInfo } },
     ]);
   }
+  // Sort
+  let sort = lodash.get(criteria, "sort");
+  let order = lodash.get(criteria, "order");
+  let setSort;
+  if (sort && order) {
+    const setOrder = (order === "ASC") ? 1 : -1;
+    setSort = [[sort, setOrder]];
+  }
   //
-  const users = await User.find(queryObj).sort([["createdAt", -1]]);
+  const users = await User.find(queryObj).sort(setSort || [["createdAt", -1]]);
   //
   for (let i = 0; i < users.length; i++) {
     users[i] = await this.wrapExtraToUser(users[i].toJSON(), more);
   }
   // pagination
+  if (more && more.notPaging === true) {
+    return {
+      count: users.length,
+      rows: users
+    }
+  }
+  //
   const DEFAULT_LIMIT = 6;
   const page = lodash.get(criteria, "page") || 1;
   const _start = DEFAULT_LIMIT * (page - 1);

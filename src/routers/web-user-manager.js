@@ -75,6 +75,23 @@ router.delete(PATH + "/users/:id", async (req, res) => {
     res.status(400).send({ message: error.message });
   }
 });
+// Filter -------------------------------------------------------------------------------------------------------------------
+router.get(PATH + "/filter/landlords", async (req, res) => {
+  const { query } = req;
+  try {
+    lodash.set(query, "userType", "LANDLORD");
+    lodash.set(query, "sort", "email");
+    lodash.set(query, "order", "ASC");
+    //
+    const more = { notPaging: true };
+    //
+    const result = await UserManager.findUsers(query, more);
+    //
+    res.send(result);
+  } catch (error) {
+    res.status(400).send({ message: error.message });
+  }
+});
 // ADMIN -------------------------------------------------------------------------------------------------------------------
 router.post(PATH + "/admin/users/login", async (req, res) => {
   const { email, password } = req.body;
@@ -110,7 +127,6 @@ router.get(PATH + "/admin/users", auth, async (req, res) => {
     res.status(400).send({ message: error.message });
   }
 });
-//
 //
 router.get(PATH + "/admin/users/:id", auth, async (req, res) => {
   const { id } = req.params;
