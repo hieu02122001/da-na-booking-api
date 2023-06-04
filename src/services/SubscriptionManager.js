@@ -1,14 +1,37 @@
 const lodash = require('lodash');
 const { Subscription } = require('../models/_Subscription');
+const { House } = require("../models/_House");
+const { User } = require("../models/_User");
+const { Package } = require("../models/_Package");
 const { mongoose } = require('mongoose');
-const { slug } = require('../utils');
+const { formatDate } = require('../utils');
 const moment = require('moment');
 
 this.findSubscriptions = async function(criteria, more) {
+  const queryObj = {};
   // Build query
+  const userId = lodash.get(criteria, "userId");
+  if (mongoose.Types.ObjectId.isValid(userId)) {
+    lodash.set(queryObj, "userId", mongoose.Types.ObjectId(userId));
+  }
   //
-  const subscriptions = await Subscription.find()
-  .sort([['price', 1]]);
+  const houseId = lodash.get(criteria, "houseId");
+  if (mongoose.Types.ObjectId.isValid(houseId)) {
+    lodash.set(queryObj, "houseId", mongoose.Types.ObjectId(houseId));
+  }
+  //
+  const packageId = lodash.get(criteria, "packageId");
+  if (mongoose.Types.ObjectId.isValid(packageId)) {
+    lodash.set(queryObj, "packageId", mongoose.Types.ObjectId(packageId));
+  }
+  //
+  const status = lodash.get(criteria, "status");
+  if (lodash.isString(status)) {
+    lodash.set(queryObj, "status", status);
+  }
+  //
+  const subscriptions = await Subscription.find(queryObj)
+  .sort([['updatedAt', 1]]);
   //
   for (let i = 0; i < subscriptions.length; i++) {
     subscriptions[i] = await this.wrapExtraToSubscription(subscriptions[i].toJSON(), more);
@@ -39,8 +62,22 @@ this.getSubscription = async function (subscriptionId, more) {
 };
 
 this.wrapExtraToSubscription = async function(subscriptionObj, more) {
+  //
+  const house = await House.findById(subscriptionObj.houseId);
+  subscriptionObj.house = lodash.pick(house, ["name"]);
+  //
+  const user = await User.findById(subscriptionObj.userId);
+  subscriptionObj.user = lodash.pick(user, ["fullName", "email"]);
+  //
+  const package = await Package.findById(subscriptionObj.packageId);
+  subscriptionObj.package = lodash.pick(package, ["name"]);
   // id
   subscriptionObj.id = lodash.get(subscriptionObj, "_id").toString();
+  // Date
+  subscriptionObj.createdAt = formatDate(subscriptionObj.createdAt);
+  subscriptionObj.updatedAt = formatDate(subscriptionObj.updatedAt);
+  subscriptionObj.beginDate = formatDate(subscriptionObj.beginDate);
+  subscriptionObj.endDate = formatDate(subscriptionObj.endDate);
   //
   return lodash.omit(subscriptionObj, ["_id"]);
 };

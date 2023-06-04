@@ -34,7 +34,7 @@ const subsSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['DRAFT', 'READY', 'PAYING', 'RUNNING', 'DONE', "CANCELED"],
-    default: "READY"
+    default: "DRAFT"
   }
 }, {
   timestamps: true,
