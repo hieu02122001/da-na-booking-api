@@ -78,6 +78,8 @@ this.wrapExtraToSubscription = async function(subscriptionObj, more) {
   subscriptionObj.updatedAt = formatDate(subscriptionObj.updatedAt);
   subscriptionObj.beginDate = formatDate(subscriptionObj.beginDate);
   subscriptionObj.endDate = formatDate(subscriptionObj.endDate);
+  // total price
+  subscriptionObj.totalPrice = subscriptionObj.totalPrice.toLocaleString('vi-VI');
   //
   return lodash.omit(subscriptionObj, ["_id"]);
 };
@@ -105,6 +107,17 @@ this.updateSubscription = async function (subscriptionId, subscriptionObj, more)
   }
   //
   const subscription = await Subscription.findByIdAndUpdate(subscriptionId, convertedObj, { new: true, runValidators: true });
+  if (!subscription) {
+    throw new Error(`Not found subscription with id [${subscriptionId}]!`);
+  }
+  //
+  await subscription.save();
+  //
+  return subscription;
+}
+
+this.switchStatusSubscription = async function (subscriptionId, status, more) {
+  const subscription = await Subscription.findByIdAndUpdate(subscriptionId, { status }, { new: true, runValidators: true });
   if (!subscription) {
     throw new Error(`Not found subscription with id [${subscriptionId}]!`);
   }

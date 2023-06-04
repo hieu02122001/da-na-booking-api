@@ -51,6 +51,18 @@ router.put(PATH + '/subscriptions/:id', async (req, res) => {
     res.status(400).send({ message: error.message });
   }
 });
+//
+router.put(PATH + '/subscriptions/:id/status/:status', async (req, res) => {
+  const { params } = req;
+  //
+  try {
+    const result = await SubscriptionManager.switchStatusSubscription(params.id, params.status.toUpperCase());
+    //
+    res.send(result);
+  } catch(error) {
+    res.status(400).send({ message: error.message });
+  }
+});
 // ADMIN -------------------------------------------------------------------------------------------------------------------
 router.get(PATH + '/admin/subscriptions', auth, async (req, res) => {
   const { query } = req;
@@ -90,6 +102,18 @@ router.put(PATH + '/admin/subscriptions/:id', auth, async (req, res) => {
   //
   try {
     const result = await SubscriptionManager.updateSubscription(params.id, body);
+    //
+    res.send(result);
+  } catch(error) {
+    res.status(400).send({ message: error.message });
+  }
+});
+//
+router.put(PATH + '/admin/subscriptions/:id/status/:status', auth, async (req, res) => {
+  const { params } = req;
+  //
+  try {
+    const result = await SubscriptionManager.switchStatusSubscription(params.id, params.status.toUpperCase());
     //
     res.send(result);
   } catch(error) {
