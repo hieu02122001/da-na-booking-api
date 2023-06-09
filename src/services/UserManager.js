@@ -18,12 +18,12 @@ this.findUsers = async function (criteria, more) {
   // House Id
   const houseId = lodash.get(criteria, "houseId");
   if (mongoose.Types.ObjectId.isValid(houseId)) {
-    lodash.set(queryObj, "houseId", mongoose.Types.ObjectId(houseId));
+    lodash.set(queryObj, "houseId", new mongoose.Types.ObjectId(houseId));
   }
   // Room Id
   const roomId = lodash.get(criteria, "roomId");
   if (mongoose.Types.ObjectId.isValid(roomId)) {
-    lodash.set(queryObj, "roomId", mongoose.Types.ObjectId(roomId));
+    lodash.set(queryObj, "roomId", new mongoose.Types.ObjectId(roomId));
   }
   // Search: slug/phone/email
   let searchInfo = lodash.get(criteria, "search");

@@ -12,17 +12,17 @@ this.findSubscriptions = async function(criteria, more) {
   // Build query
   const userId = lodash.get(criteria, "userId");
   if (mongoose.Types.ObjectId.isValid(userId)) {
-    lodash.set(queryObj, "userId", mongoose.Types.ObjectId(userId));
+    lodash.set(queryObj, "userId", new mongoose.Types.ObjectId(userId));
   }
   //
   const houseId = lodash.get(criteria, "houseId");
   if (mongoose.Types.ObjectId.isValid(houseId)) {
-    lodash.set(queryObj, "houseId", mongoose.Types.ObjectId(houseId));
+    lodash.set(queryObj, "houseId", new mongoose.Types.ObjectId(houseId));
   }
   //
   const packageId = lodash.get(criteria, "packageId");
   if (mongoose.Types.ObjectId.isValid(packageId)) {
-    lodash.set(queryObj, "packageId", mongoose.Types.ObjectId(packageId));
+    lodash.set(queryObj, "packageId", new mongoose.Types.ObjectId(packageId));
   }
   //
   const status = lodash.get(criteria, "status");

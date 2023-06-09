@@ -13,7 +13,7 @@ this.findHouses = async function (criteria, more) {
   // User Id
   const userId = lodash.get(criteria, "userId");
   if (mongoose.Types.ObjectId.isValid(userId)) {
-    lodash.set(queryObj, "userId", mongoose.Types.ObjectId(userId));
+    lodash.set(queryObj, "userId", new mongoose.Types.ObjectId(userId));
   }
   // Search: slug
   let searchInfo = lodash.get(criteria, "search");
@@ -22,10 +22,26 @@ this.findHouses = async function (criteria, more) {
     lodash.set(queryObj, "$or", [{ slug: { $regex: searchInfo } }]);
   }
   //
-  const houses = await House.find(queryObj).sort([["createdAt", -1]]);
+  // Sort
+  let sort = lodash.get(criteria, "sort");
+  let order = lodash.get(criteria, "order");
+  let setSort;
+  if (sort && order) {
+    const setOrder = (order === "ASC") ? 1 : -1;
+    setSort = [[sort, setOrder]];
+  }
+  //
+  const houses = await House.find(queryObj).sort(setSort || [["createdAt", -1]]);
   //
   for (let i = 0; i < houses.length; i++) {
     houses[i] = await this.wrapExtraToHouse(houses[i].toJSON(), more);
+  }
+  // pagination
+  if (more && more.notPaging === true) {
+    return {
+      count: houses.length,
+      rows: houses
+    }
   }
   // pagination
   const DEFAULT_LIMIT = 6;

@@ -63,6 +63,22 @@ router.delete(PATH + '/houses/:id', async (req, res) => {
     res.status(400).send({ message: error.message });
   }
 });
+// Filter -------------------------------------------------------------------------------------------------------------------
+router.get(PATH + "/filter/houses", async (req, res) => {
+  const { query } = req;
+  try {
+    lodash.set(query, "sort", "name");
+    lodash.set(query, "order", "ASC");
+    //
+    const more = { notPaging: true };
+    //
+    const result = await HouseManager.findHouses(query, more);
+    //
+    res.send(result);
+  } catch (error) {
+    res.status(400).send({ message: error.message });
+  }
+});
 // ADMIN -------------------------------------------------------------------------------------------------------------------
 router.get(PATH + '/admin/houses', auth, async (req, res) => {
   const { query } = req;

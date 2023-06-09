@@ -12,12 +12,12 @@ this.findRooms = async function(criteria, more) {
   // User Id
   const userId = lodash.get(criteria, "userId");
   if(mongoose.Types.ObjectId.isValid(userId)) {
-    lodash.set(queryObj, "userId", mongoose.Types.ObjectId(userId));
+    lodash.set(queryObj, "userId", new mongoose.Types.ObjectId(userId));
   }
   // House Id
   const houseId = lodash.get(criteria, "houseId");
   if(mongoose.Types.ObjectId.isValid(houseId)) {
-    lodash.set(queryObj, "houseId", mongoose.Types.ObjectId(houseId));
+    lodash.set(queryObj, "houseId", new mongoose.Types.ObjectId(houseId));
   }
   // Price
   // Search: slug
