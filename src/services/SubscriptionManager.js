@@ -76,8 +76,10 @@ this.wrapExtraToSubscription = async function(subscriptionObj, more) {
   // Date
   subscriptionObj.createdAt = formatDate(subscriptionObj.createdAt);
   subscriptionObj.updatedAt = formatDate(subscriptionObj.updatedAt);
-  subscriptionObj.beginDate = formatDate(subscriptionObj.beginDate);
-  subscriptionObj.endDate = formatDate(subscriptionObj.endDate);
+  if (subscriptionObj.beginDate && subscriptionObj.endDate) {
+    subscriptionObj.beginDate = formatDate(subscriptionObj.beginDate);
+    subscriptionObj.endDate = formatDate(subscriptionObj.endDate);
+  }
   // total price
   subscriptionObj.totalPrice = subscriptionObj.totalPrice.toLocaleString('vi-VI');
   //
@@ -85,12 +87,8 @@ this.wrapExtraToSubscription = async function(subscriptionObj, more) {
 };
 
 this.createSubscription = async function (subscriptionObj, more) {
-  // Convert Date
-  const { beginDate, endDate, ...convertedObj } = subscriptionObj;
-  convertedObj.beginDate = new Date(subscriptionObj.beginDate);
-  convertedObj.endDate = new Date (subscriptionObj.endDate);
   //
-  const subscription = new Subscription(convertedObj);
+  const subscription = new Subscription(subscriptionObj);
   await subscription.save();
   //
   return subscription;

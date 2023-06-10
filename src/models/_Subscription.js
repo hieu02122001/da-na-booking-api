@@ -21,11 +21,9 @@ const subsSchema = new mongoose.Schema({
   },
   beginDate: {
     type: Date,
-    required: true,
   },
   endDate: {
     type: Date,
-    required: true,
   },
   totalPrice: {
     type: Number,
