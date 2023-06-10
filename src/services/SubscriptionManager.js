@@ -31,7 +31,7 @@ this.findSubscriptions = async function(criteria, more) {
   }
   //
   const subscriptions = await Subscription.find(queryObj)
-  .sort([['updatedAt', 1]]);
+  .sort([['updatedAt', -1]]);
   //
   for (let i = 0; i < subscriptions.length; i++) {
     subscriptions[i] = await this.wrapExtraToSubscription(subscriptions[i].toJSON(), more);
@@ -115,14 +115,38 @@ this.updateSubscription = async function (subscriptionId, subscriptionObj, more)
 }
 
 this.switchStatusSubscription = async function (subscriptionId, status, more) {
-  const subscription = await Subscription.findByIdAndUpdate(subscriptionId, { status }, { new: true, runValidators: true });
+  const subsObj = { status }
+  //
+  const subscription = await Subscription.findById(subscriptionId);
   if (!subscription) {
     throw new Error(`Not found subscription with id [${subscriptionId}]!`);
   }
+  // Add beginDate & endDate when status is RUNNING
+  if (status === "RUNNING") {
+    const { months } = await Package.findById(subscription.packageId);
+    //
+    const latestRunningSubs = await Subscription.findOne({
+      houseId: new mongoose.Types.ObjectId(subscription.houseId),
+      status: "RUNNING"
+    })
+    if (!latestRunningSubs) {
+      const beginDate = new Date();
+      const endDate = moment(beginDate).add(months, "months");
+      subsObj.beginDate = beginDate;
+      subsObj.endDate = endDate;
+    } else {
+      const beginDate = latestRunningSubs.endDate;
+      const endDate = moment(beginDate).add(months, "months");
+      subsObj.beginDate = beginDate;
+      subsObj.endDate = endDate;
+    }
+  }
   //
-  await subscription.save();
+  const updatedSubscription = await Subscription.findByIdAndUpdate(subscriptionId, subsObj, { new: true, runValidators: true });
   //
-  return subscription;
+  await updatedSubscription.save();
+  //
+  return updatedSubscription;
 }
 
 //
