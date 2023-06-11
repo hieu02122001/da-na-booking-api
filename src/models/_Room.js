@@ -29,6 +29,9 @@ const roomSchema = new mongoose.Schema({
     required: true,
     default: 0,
   },
+  images: {
+    type: Array,
+  },
   isDeleted: {
     type: Boolean,
     required: true,

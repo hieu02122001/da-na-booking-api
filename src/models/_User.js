@@ -37,6 +37,9 @@ const userSchema = new mongoose.Schema({
     trim: true,
     minlength: 6,
   },
+  image: {
+    type: String,
+  },
   userType: {
     type:String,
     enum: ['ADMIN', 'LANDLORD', 'TENANT'],
