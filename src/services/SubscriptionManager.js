@@ -128,7 +128,7 @@ this.switchStatusSubscription = async function (subscriptionId, status, more) {
     const latestRunningSubs = await Subscription.findOne({
       houseId: new mongoose.Types.ObjectId(subscription.houseId),
       status: "RUNNING"
-    })
+    }).sort([["endDate", -1]]);
     if (!latestRunningSubs) {
       const beginDate = new Date();
       const endDate = moment(beginDate).add(months, "months");
@@ -144,7 +144,15 @@ this.switchStatusSubscription = async function (subscriptionId, status, more) {
   //
   const updatedSubscription = await Subscription.findByIdAndUpdate(subscriptionId, subsObj, { new: true, runValidators: true });
   //
-  await updatedSubscription.save();
+  const anyRunningSubs = await Subscription.findOne({
+    houseId: new mongoose.Types.ObjectId(subscription.houseId),
+    status: "RUNNING"
+  })
+  if (!anyRunningSubs) {
+    await House.findByIdAndUpdate(subscription.houseId, { isActivated: false });
+  } else {
+    await House.findByIdAndUpdate(subscription.houseId, { isActivated: true });
+  }
   //
   return updatedSubscription;
 }
