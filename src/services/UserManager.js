@@ -10,6 +10,12 @@ this.findUsers = async function (criteria, more) {
     isDeleted: false,
   };
   // Build query
+  const ids = lodash.get(criteria, "ids");
+  if (ids) {
+    lodash.set(queryObj, "_id", {
+      $in: ids,
+    });
+  }
   // Role
   const userType = lodash.get(criteria, "userType");
   if (userType) {
@@ -40,7 +46,7 @@ this.findUsers = async function (criteria, more) {
   let order = lodash.get(criteria, "order");
   let setSort;
   if (sort && order) {
-    const setOrder = (order === "ASC") ? 1 : -1;
+    const setOrder = order === "ASC" ? 1 : -1;
     setSort = [[sort, setOrder]];
   }
   //
@@ -53,8 +59,8 @@ this.findUsers = async function (criteria, more) {
   if (more && more.notPaging === true) {
     return {
       count: users.length,
-      rows: users
-    }
+      rows: users,
+    };
   }
   //
   const DEFAULT_LIMIT = 6;
@@ -94,6 +100,9 @@ this.wrapExtraToUser = async function (userObj, more) {
       isDeleted: false,
     }).sort([["createdAt", -1]]);
     userObj.houses = houses;
+  }
+  //
+  if (more && more.withRoom === true) {
   }
   //
   return lodash.omit(userObj, ["_id", "password", "token"]);
