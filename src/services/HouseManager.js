@@ -4,6 +4,7 @@ const { User } = require("../models/_User");
 const { District } = require("../models/_District");
 const { mongoose } = require("mongoose");
 const { slug, formatDate } = require("../utils");
+const { Room } = require("../models/_Room");
 
 this.findHouses = async function (criteria, more) {
   const queryObj = {
@@ -80,6 +81,19 @@ this.wrapExtraToHouse = async function (houseObj, more) {
   // district
   const district = await District.findById(houseObj.district);
   houseObj.district = lodash.pick(district, "name");
+  // Due-date
+  
+  // Room count
+  const roomCount = await Room.count({
+    houseId: houseObj.id
+  });
+  houseObj.roomCount = roomCount;
+  // Rented room count
+  const rentedRoomCount = await Room.count({
+    houseId: houseObj.id,
+    userId: { $exists: true, $ne: null }
+  });
+  houseObj.rentedRoomCount = rentedRoomCount;
   //
   return lodash.omit(houseObj, ["_id"]);
 };
