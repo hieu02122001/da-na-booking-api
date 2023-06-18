@@ -1,5 +1,7 @@
 const lodash = require('lodash');
 const { Room } = require('../models/_Room');
+const { User } = require('../models/_User');
+const { House } = require('../models/_House');
 const { mongoose } = require('mongoose');
 const { slug } = require('../utils');
 const moment = require('moment');
@@ -63,6 +65,14 @@ this.getRoom = async function (roomId, more) {
 this.wrapExtraToRoom = async function(roomObj, more) {
   // id
   roomObj.id = lodash.get(roomObj, "_id").toString();
+  // userInfo
+  if (roomObj.userId) {
+    roomObj.user = await User.findById(roomObj.userId, "fullName");
+  }
+  // houseInfo
+  roomObj.house = await House.findById(roomObj.houseId, "name");
+  // price
+  roomObj.price = roomObj.price.toLocaleString('vi-VI');
   //
   return lodash.omit(roomObj, ["_id"]);
 };
