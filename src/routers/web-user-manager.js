@@ -290,7 +290,7 @@ router.post(PATH + "/users/client/login", async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await User.findByCredentials(email, password, {
-      userType: "CLIENT",
+      userType: "TENANT",
     });
     //
     const token = await UserManager.generateAuthToken(user._id);

@@ -16,6 +16,11 @@ this.findHouses = async function (criteria, more) {
   if (mongoose.Types.ObjectId.isValid(userId)) {
     lodash.set(queryObj, "userId", new mongoose.Types.ObjectId(userId));
   }
+  // district
+  const district = lodash.get(criteria, "district");
+  if (mongoose.Types.ObjectId.isValid(district)) {
+    lodash.set(queryObj, "district", new mongoose.Types.ObjectId(district));
+  }
   // Search: slug
   let searchInfo = lodash.get(criteria, "search");
   if (searchInfo) {

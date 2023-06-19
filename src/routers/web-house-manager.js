@@ -183,6 +183,16 @@ router.put(PATH + '/landlord/houses/:id', auth, async (req, res) => {
     res.status(400).send({ message: error.message });
   }
 });
-//
+// TENANT -------------------------------------------------------------------------------------------------------------------
+router.get(PATH + '/tenant/houses', auth, async (req, res) => {
+  const { query } = req;
+  try {
+    const result = await HouseManager.findHouses(query, { notPaging: true });
+    //
+    res.send(result);
+  } catch (error) {
+    res.status(400).send({ message: error.message });
+  }
+});
 //
 module.exports = router;
