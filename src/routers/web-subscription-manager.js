@@ -122,6 +122,61 @@ router.put(PATH + '/admin/subscriptions/:id/status/:status', auth, async (req, r
 });
 
 // LANDLORD ----------------------------------------------------------------------------------------------------------------
-
+router.get(PATH + '/landlord/subscriptions', auth, async (req, res) => {
+  const { query } = req;
+  try {
+    const result = await SubscriptionManager.findSubscriptions(query);
+    //
+    res.send(result);
+  } catch (error) {
+    res.status(400).send({ message: error.message });
+  }
+});
+//
+router.get(PATH + '/landlord/subscriptions/:id', auth, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await SubscriptionManager.getSubscription(id);
+    //
+    res.send(result);
+  } catch(error) {
+    res.status(400).send({ message: error.message });
+  }
+});
+//
+router.post(PATH + '/landlord/subscriptions', auth, async (req, res) => {
+  const { body } = req;
+  try {
+    const result = await SubscriptionManager.createSubscription(body)
+    //
+    res.send(result);
+  } catch (error) {
+    res.status(400).send({ message: error.message });
+  }
+});
+//
+router.put(PATH + '/landlord/subscriptions/:id', auth, async (req, res) => {
+  const { body, params } = req;
+  //
+  try {
+    const result = await SubscriptionManager.updateSubscription(params.id, body);
+    //
+    res.send(result);
+  } catch(error) {
+    res.status(400).send({ message: error.message });
+  }
+});
+//
+router.put(PATH + '/landlord/subscriptions/:id/status/:status', auth, async (req, res) => {
+  const { params } = req;
+  //
+  try {
+    const result = await SubscriptionManager.switchStatusSubscription(params.id, params.status.toUpperCase());
+    //
+    res.send(result);
+  } catch(error) {
+    res.status(400).send({ message: error.message });
+  }
+});
 //
 module.exports = router;
