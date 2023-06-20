@@ -184,10 +184,11 @@ router.put(PATH + '/landlord/houses/:id', auth, async (req, res) => {
   }
 });
 // TENANT -------------------------------------------------------------------------------------------------------------------
-router.get(PATH + '/tenant/houses', auth, async (req, res) => {
+router.get(PATH + '/tenant/houses', async (req, res) => {
   const { query } = req;
+  query.isActivated = true;
   try {
-    const result = await HouseManager.findHouses(query, { notPaging: true });
+    const result = await HouseManager.findHouses(query, { notPaging: true, withPrice: true });
     //
     res.send(result);
   } catch (error) {
