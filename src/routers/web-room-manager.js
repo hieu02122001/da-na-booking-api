@@ -122,5 +122,29 @@ router.delete(PATH + '/landlord/rooms/:id', auth, async (req, res) => {
     res.status(400).send({ message: error.message });
   }
 });
+
+// TENANT -------------------------------------------------------------------------------------------------------------------
+
+router.get(PATH + '/tenant/rooms', auth, async (req, res) => {
+  const { query } = req;
+  try {
+    const result = await RoomManager.findRooms(query, { notPaging: true });
+    //
+    res.send(result);
+  } catch (error) {
+    res.status(400).send({ message: error.message });
+  }
+});
+//
+router.get(PATH + '/tenant/rooms/:id', auth, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await RoomManager.getRoom(id);
+    //
+    res.send(result);
+  } catch(error) {
+    res.status(400).send({ message: error.message });
+  }
+});
 //
 module.exports = router;

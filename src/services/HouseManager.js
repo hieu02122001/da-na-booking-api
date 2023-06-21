@@ -87,7 +87,7 @@ this.wrapExtraToHouse = async function (houseObj, more) {
   houseObj.updatedAt = formatDate(houseObj.updatedAt);
   // user
   const user = await User.findById(houseObj.userId);
-  houseObj.owner = lodash.pick(user, ["fullName", "email"]);
+  houseObj.owner = lodash.pick(user, ["fullName", "email", "phone"]);
   // district
   const district = await District.findById(houseObj.district);
   houseObj.district = lodash.pick(district, "name");

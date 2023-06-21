@@ -32,7 +32,7 @@ this.findRooms = async function(criteria, more) {
   }
   //
   const rooms = await Room.find(queryObj)
-  .sort([['createdAt', -1]]);
+  .sort([['name', 1]]);
   //
   for (let i = 0; i < rooms.length; i++) {
     rooms[i] = await this.wrapExtraToRoom(rooms[i].toJSON(), more);

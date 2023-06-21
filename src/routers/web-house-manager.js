@@ -184,7 +184,7 @@ router.put(PATH + '/landlord/houses/:id', auth, async (req, res) => {
   }
 });
 // TENANT -------------------------------------------------------------------------------------------------------------------
-router.get(PATH + '/tenant/houses', async (req, res) => {
+router.get(PATH + '/tenant/houses', auth, async (req, res) => {
   const { query } = req;
   query.isActivated = true;
   try {
@@ -192,6 +192,17 @@ router.get(PATH + '/tenant/houses', async (req, res) => {
     //
     res.send(result);
   } catch (error) {
+    res.status(400).send({ message: error.message });
+  }
+});
+//
+router.get(PATH + '/tenant/houses/:id', auth, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await HouseManager.getHouse(id);
+    //
+    res.send(result);
+  } catch(error) {
     res.status(400).send({ message: error.message });
   }
 });
