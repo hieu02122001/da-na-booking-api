@@ -9,14 +9,14 @@ const subsSchema = new mongoose.Schema({
     ref: 'House',
     required: true,
   },
+  roomId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Room',
+    required: true,
+  },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
-  },
-  packageId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Package',
     required: true,
   },
   beginDate: {
@@ -29,10 +29,13 @@ const subsSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  brokerageFee: {
+    type: Number,
+  },
   status: {
     type: String,
-    enum: ['DRAFT', 'READY', 'PAYING', 'RUNNING', 'DONE', "CANCELED"],
-    default: "DRAFT"
+    enum: ['RUNNING', 'SUCCESS', 'FAIL'],
+    default: "RUNNING"
   }
 }, {
   timestamps: true,

@@ -32,6 +32,11 @@ const roomSchema = new mongoose.Schema({
   images: {
     type: Array,
   },
+  isRented: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
   isDeleted: {
     type: Boolean,
     required: true,

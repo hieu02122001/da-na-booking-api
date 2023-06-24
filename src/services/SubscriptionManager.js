@@ -1,13 +1,14 @@
-const lodash = require('lodash');
-const { Subscription } = require('../models/_Subscription');
+const lodash = require("lodash");
+const { Subscription } = require("../models/_Subscription");
 const { House } = require("../models/_House");
+const { Room } = require("../models/_Room");
 const { User } = require("../models/_User");
 const { Package } = require("../models/_Package");
-const { mongoose } = require('mongoose');
-const { formatDate } = require('../utils');
-const moment = require('moment');
+const { mongoose } = require("mongoose");
+const { formatDate } = require("../utils");
+const moment = require("moment");
 
-this.findSubscriptions = async function(criteria, more) {
+this.findSubscriptions = async function (criteria, more) {
   const queryObj = {};
   // Build query
   const userId = lodash.get(criteria, "userId");
@@ -15,14 +16,9 @@ this.findSubscriptions = async function(criteria, more) {
     lodash.set(queryObj, "userId", new mongoose.Types.ObjectId(userId));
   }
   //
-  const houseId = lodash.get(criteria, "houseId");
-  if (mongoose.Types.ObjectId.isValid(houseId)) {
-    lodash.set(queryObj, "houseId", new mongoose.Types.ObjectId(houseId));
-  }
-  //
-  const packageId = lodash.get(criteria, "packageId");
-  if (mongoose.Types.ObjectId.isValid(packageId)) {
-    lodash.set(queryObj, "packageId", new mongoose.Types.ObjectId(packageId));
+  const roomId = lodash.get(criteria, "roomId");
+  if (mongoose.Types.ObjectId.isValid(roomId)) {
+    lodash.set(queryObj, "roomId", new mongoose.Types.ObjectId(roomId));
   }
   //
   const status = lodash.get(criteria, "status");
@@ -30,16 +26,20 @@ this.findSubscriptions = async function(criteria, more) {
     lodash.set(queryObj, "status", status);
   }
   //
-  const subscriptions = await Subscription.find(queryObj)
-  .sort([['updatedAt', -1]]);
+  const subscriptions = await Subscription.find(queryObj).sort([
+    ["updatedAt", -1],
+  ]);
   //
   for (let i = 0; i < subscriptions.length; i++) {
-    subscriptions[i] = await this.wrapExtraToSubscription(subscriptions[i].toJSON(), more);
+    subscriptions[i] = await this.wrapExtraToSubscription(
+      subscriptions[i].toJSON(),
+      more
+    );
   }
   // pagination
   const DEFAULT_LIMIT = 6;
   const page = lodash.get(criteria, "page") || 1;
-  const _start = DEFAULT_LIMIT * (page -1);
+  const _start = DEFAULT_LIMIT * (page - 1);
   const _end = DEFAULT_LIMIT * page;
   const paginatedSubscriptions = lodash.slice(subscriptions, _start, _end);
   //
@@ -47,9 +47,9 @@ this.findSubscriptions = async function(criteria, more) {
     count: subscriptions.length,
     page: page,
     rows: paginatedSubscriptions,
-  }
+  };
   return output;
-}
+};
 
 this.getSubscription = async function (subscriptionId, more) {
   const subscriptions = await Subscription.findById(subscriptionId);
@@ -61,40 +61,50 @@ this.getSubscription = async function (subscriptionId, more) {
   return this.wrapExtraToSubscription(subscriptions.toJSON(), more);
 };
 
-this.wrapExtraToSubscription = async function(subscriptionObj, more) {
-  //
+this.wrapExtraToSubscription = async function (subscriptionObj, more) {
   const house = await House.findById(subscriptionObj.houseId);
   subscriptionObj.house = lodash.pick(house, ["name"]);
   //
+  const room = await Room.findById(subscriptionObj.roomId);
+  subscriptionObj.room = lodash.pick(room, ["name"]);
+  //
   const user = await User.findById(subscriptionObj.userId);
   subscriptionObj.user = lodash.pick(user, ["fullName", "email"]);
-  //
-  const package = await Package.findById(subscriptionObj.packageId);
-  subscriptionObj.package = lodash.pick(package, ["name"]);
   // id
   subscriptionObj.id = lodash.get(subscriptionObj, "_id").toString();
   // Date
   subscriptionObj.createdAt = formatDate(subscriptionObj.createdAt);
   subscriptionObj.updatedAt = formatDate(subscriptionObj.updatedAt);
-  if (subscriptionObj.beginDate && subscriptionObj.endDate) {
+  if (subscriptionObj.beginDate) {
     subscriptionObj.beginDate = formatDate(subscriptionObj.beginDate);
-    subscriptionObj.endDate = formatDate(subscriptionObj.endDate);
   }
+  if (subscriptionObj.endDate)
+    subscriptionObj.endDate = formatDate(subscriptionObj.endDate);
+
   // total price
-  subscriptionObj.totalPrice = subscriptionObj.totalPrice.toLocaleString('vi-VI');
+  subscriptionObj.totalPrice =
+    subscriptionObj.totalPrice.toLocaleString("vi-VI");
+  if (lodash.isNumber(subscriptionObj.brokerageFee))
+    subscriptionObj.brokerageFee =
+      subscriptionObj.brokerageFee.toLocaleString("vi-VI");
   //
   return lodash.omit(subscriptionObj, ["_id"]);
 };
 
 this.createSubscription = async function (subscriptionObj, more) {
+  subscriptionObj.beginDate = new Date();
   //
   const subscription = new Subscription(subscriptionObj);
   await subscription.save();
   //
   return subscription;
-}
+};
 
-this.updateSubscription = async function (subscriptionId, subscriptionObj, more) {
+this.updateSubscription = async function (
+  subscriptionId,
+  subscriptionObj,
+  more
+) {
   // Convert Date
   const convertedObj = { ...subscriptionObj };
   if ("beginDate" in subscriptionObj) {
@@ -104,7 +114,11 @@ this.updateSubscription = async function (subscriptionId, subscriptionObj, more)
     convertedObj.endDate = new Date(subscriptionObj.endDate);
   }
   //
-  const subscription = await Subscription.findByIdAndUpdate(subscriptionId, convertedObj, { new: true, runValidators: true });
+  const subscription = await Subscription.findByIdAndUpdate(
+    subscriptionId,
+    convertedObj,
+    { new: true, runValidators: true }
+  );
   if (!subscription) {
     throw new Error(`Not found subscription with id [${subscriptionId}]!`);
   }
@@ -112,50 +126,32 @@ this.updateSubscription = async function (subscriptionId, subscriptionObj, more)
   await subscription.save();
   //
   return subscription;
-}
+};
 
 this.switchStatusSubscription = async function (subscriptionId, status, more) {
-  const subsObj = { status }
+  const subsObj = { status };
   //
   const subscription = await Subscription.findById(subscriptionId);
   if (!subscription) {
     throw new Error(`Not found subscription with id [${subscriptionId}]!`);
   }
-  // Add beginDate & endDate when status is RUNNING
-  if (status === "RUNNING") {
-    const { months } = await Package.findById(subscription.packageId);
-    //
-    const latestRunningSubs = await Subscription.findOne({
-      houseId: new mongoose.Types.ObjectId(subscription.houseId),
-      status: "RUNNING"
-    }).sort([["endDate", -1]]);
-    if (!latestRunningSubs) {
-      const beginDate = new Date();
-      const endDate = moment(beginDate).add(months, "months");
-      subsObj.beginDate = beginDate;
-      subsObj.endDate = endDate;
-    } else {
-      const beginDate = latestRunningSubs.endDate;
-      const endDate = moment(beginDate).add(months, "months");
-      subsObj.beginDate = beginDate;
-      subsObj.endDate = endDate;
-    }
+  // Add endDate when status is SUCCESS
+  if (status === "SUCCESS") {
+    subsObj.endDate = new Date();
+    subsObj.brokerageFee = subscription.totalPrice * 0.05;
+  } else if (status === "FAIL") {
+    subsObj.endDate = new Date();
+    subsObj.brokerageFee = 0;
   }
   //
-  const updatedSubscription = await Subscription.findByIdAndUpdate(subscriptionId, subsObj, { new: true, runValidators: true });
-  //
-  const anyRunningSubs = await Subscription.findOne({
-    houseId: new mongoose.Types.ObjectId(subscription.houseId),
-    status: "RUNNING"
-  })
-  if (!anyRunningSubs) {
-    await House.findByIdAndUpdate(subscription.houseId, { isActivated: false });
-  } else {
-    await House.findByIdAndUpdate(subscription.houseId, { isActivated: true });
-  }
+  const updatedSubscription = await Subscription.findByIdAndUpdate(
+    subscriptionId,
+    subsObj,
+    { new: true, runValidators: true }
+  );
   //
   return updatedSubscription;
-}
+};
 
 //
-module.exports = this
+module.exports = this;
