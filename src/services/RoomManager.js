@@ -21,6 +21,11 @@ this.findRooms = async function(criteria, more) {
   if(mongoose.Types.ObjectId.isValid(houseId)) {
     lodash.set(queryObj, "houseId", new mongoose.Types.ObjectId(houseId));
   }
+  // House ids
+  const houseIds = lodash.get(criteria, "houseIds");
+  if(lodash.isArray(houseIds)) {
+    lodash.set(queryObj, "houseId", { $in: houseIds });
+  }
   // Price
   // Search: slug
   let searchInfo = lodash.get(criteria, "search");
@@ -75,7 +80,7 @@ this.wrapExtraToRoom = async function(roomObj, more) {
     roomObj.user = await User.findById(roomObj.userId, "fullName");
   }
   // houseInfo
-  roomObj.house = await House.findById(roomObj.houseId, "name");
+  roomObj.house = await House.findById(roomObj.houseId, ["name", "address", "description", "image"]);
   // price
   roomObj.price = roomObj.price.toLocaleString('vi-VI');
   //

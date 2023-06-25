@@ -3,6 +3,7 @@ const lodash = require('lodash');
 const router = new express.Router();
 
 const RoomManager = require('../services/RoomManager');
+const { House } = require('../models/_House');
 //
 const { auth } = require("../middleware/auth");
 const { PATH } = require('../utils');
@@ -131,6 +132,11 @@ router.delete(PATH + '/landlord/rooms/:id', auth, async (req, res) => {
 router.get(PATH + '/tenant/rooms', async (req, res) => {
   const { query } = req;
   query.isAds = true;
+  if (query.district) {
+    const houses = await House.find({ district: query.district});
+    const houseIds = houses.map(item => item._id);
+    query.houseIds = houseIds;
+  }
   try {
     const result = await RoomManager.findRooms(query, { notPaging: true });
     //
