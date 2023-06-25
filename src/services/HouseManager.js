@@ -90,7 +90,7 @@ this.wrapExtraToHouse = async function (houseObj, more) {
   houseObj.owner = lodash.pick(user, ["fullName", "email", "phone"]);
   // district
   const district = await District.findById(houseObj.district);
-  houseObj.district = lodash.pick(district, "name");
+  houseObj.district = lodash.pick(district, ["name", "_id"]);
   // Due-date
   
   // Room count
