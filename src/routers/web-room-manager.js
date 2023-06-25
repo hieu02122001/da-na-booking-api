@@ -68,6 +68,9 @@ router.delete(PATH + '/rooms/:id', async (req, res) => {
 
 router.get(PATH + '/landlord/rooms', auth, async (req, res) => {
   const { query } = req;
+  if (query.isAds) {
+    query.isAds = query.isAds === 'false' ? false : true;
+  }
   try {
     const result = await RoomManager.findRooms(query, { notPaging: true });
     //
@@ -125,8 +128,9 @@ router.delete(PATH + '/landlord/rooms/:id', auth, async (req, res) => {
 
 // TENANT -------------------------------------------------------------------------------------------------------------------
 
-router.get(PATH + '/tenant/rooms', auth, async (req, res) => {
+router.get(PATH + '/tenant/rooms', async (req, res) => {
   const { query } = req;
+  query.isAds = true;
   try {
     const result = await RoomManager.findRooms(query, { notPaging: true });
     //
@@ -136,7 +140,7 @@ router.get(PATH + '/tenant/rooms', auth, async (req, res) => {
   }
 });
 //
-router.get(PATH + '/tenant/rooms/:id', auth, async (req, res) => {
+router.get(PATH + '/tenant/rooms/:id', async (req, res) => {
   const { id } = req.params;
   try {
     const result = await RoomManager.getRoom(id);

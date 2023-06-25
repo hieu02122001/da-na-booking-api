@@ -37,6 +37,13 @@ this.findSubscriptions = async function (criteria, more) {
     );
   }
   // pagination
+  if (more && more.notPaging === true) {
+    return {
+      count: subscriptions.length,
+      rows: subscriptions
+    }
+  }
+  // pagination
   const DEFAULT_LIMIT = 6;
   const page = lodash.get(criteria, "page") || 1;
   const _start = DEFAULT_LIMIT * (page - 1);
@@ -93,9 +100,14 @@ this.wrapExtraToSubscription = async function (subscriptionObj, more) {
 
 this.createSubscription = async function (subscriptionObj, more) {
   subscriptionObj.beginDate = new Date();
+  if (lodash.isString(subscriptionObj.totalPrice)) {
+    subscriptionObj.totalPrice = Number(subscriptionObj.totalPrice.replaceAll(".", ""));
+  }
   //
   const subscription = new Subscription(subscriptionObj);
   await subscription.save();
+  //
+  await Room.findByIdAndUpdate(subscriptionObj.roomId, { isAds: true });
   //
   return subscription;
 };

@@ -184,7 +184,7 @@ router.put(PATH + '/landlord/houses/:id', auth, async (req, res) => {
   }
 });
 // TENANT -------------------------------------------------------------------------------------------------------------------
-router.get(PATH + '/tenant/houses', auth, async (req, res) => {
+router.get(PATH + '/tenant/houses', async (req, res) => {
   const { query } = req;
   query.isActivated = true;
   try {
@@ -196,7 +196,7 @@ router.get(PATH + '/tenant/houses', auth, async (req, res) => {
   }
 });
 //
-router.get(PATH + '/tenant/houses/:id', auth, async (req, res) => {
+router.get(PATH + '/tenant/houses/:id', async (req, res) => {
   const { id } = req.params;
   try {
     const result = await HouseManager.getHouse(id);

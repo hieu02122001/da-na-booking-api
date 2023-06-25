@@ -30,6 +30,11 @@ this.findRooms = async function(criteria, more) {
       { "slug": { "$regex": searchInfo } },
     ])
   }
+  // isAds
+  const isAds = lodash.get(criteria, "isAds");
+  if(lodash.isBoolean(isAds)) {
+    lodash.set(queryObj, "isAds", isAds);
+  }
   //
   const rooms = await Room.find(queryObj)
   .sort([['name', 1]]);
