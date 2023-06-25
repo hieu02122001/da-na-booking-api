@@ -4,6 +4,11 @@ const lodash = require('lodash');
 const { slug } = require('../utils');
 //
 const bookingSchema = new mongoose.Schema({
+  houseId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'House',
+    required: true,
+  },
   roomId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Room',
@@ -24,11 +29,12 @@ const bookingSchema = new mongoose.Schema({
   },
   totalPrice: {
     type: Number,
+    required: true,
   },
   status: {
     type: String,
-    enum: ['READY', "PAYING", 'RUNNING', 'DONE', "CANCELED"],
-    default: "READY"
+    enum: ['PENDING', "APPROVED", 'SUCCESS', 'REJECTED'],
+    default: "PENDING"
   }
 }, {
   timestamps: true,
