@@ -6,6 +6,8 @@ const moment = require('moment');
 const { House } = require('../models/_House');
 const { Room } = require('../models/_Room');
 const { User } = require('../models/_User');
+const { Subscription } = require('../models/_Subscription');
+const SubscriptionManager = require('./SubscriptionManager')
 
 this.findBookings = async function(criteria, more) {
   // Build query
@@ -20,12 +22,24 @@ this.findBookings = async function(criteria, more) {
   if(lodash.isArray(houseIds)) {
     lodash.set(queryObj, "houseId", { $in: houseIds });
   }
+  // Status
+  const status = lodash.get(criteria, "status");
+  if (status) {
+    lodash.set(queryObj, "status", status.toUpperCase())
+  }
   //
-  const bookings = await Booking.find()
+  const bookings = await Booking.find(queryObj)
   .sort([['updatedAt', -1]]);
   //
   for (let i = 0; i < bookings.length; i++) {
     bookings[i] = await this.wrapExtraToBooking(bookings[i].toJSON(), more);
+  }
+  // pagination
+  if (more && more.notPaging === true) {
+    return {
+      count: bookings.length,
+      rows: bookings
+    }
   }
   // pagination
   const DEFAULT_LIMIT = 6;
@@ -68,7 +82,7 @@ this.wrapExtraToBooking = async function(bookingObj, more) {
   bookingObj.house = lodash.pick(house, ["name"]);
   // Room
   const room = await Room.findById(bookingObj.roomId);
-  bookingObj.room = lodash.pick(room, ["name"]);
+  bookingObj.room = lodash.pick(room, ["name", "images"]);
   // User
   const user = await User.findById(bookingObj.userId);
   bookingObj.user = lodash.pick(user, ["fullName", "email"]);
@@ -128,7 +142,21 @@ this.switchStatusBooking = async function (bookingId, status, more) {
     { new: true, runValidators: true }
   );
   //
-  if (status === "SUCCESS") {}
+  if (status === "SUCCESS") {
+    // Success a subs about this room
+    const subs = await Subscription.findOne({ roomId: updatedBooking.roomId });
+    await SubscriptionManager.switchStatusSubscription(subs._id, "SUCCESS");
+    // Room ads: false
+    await Room.findOneAndUpdate(updatedBooking.roomId, { isAds: false })
+    // Reject all booking of this room
+    const bookings = await Booking.find({
+      status: { $in: ["PENDING", "APPROVED"]},
+      roomId: updatedBooking.roomId
+    });
+    for (const item of bookings) {
+      await Booking.findByIdAndUpdate(item._id, { status: "REJECTED" });
+    }
+  }
   //
   return updatedBooking;
 };

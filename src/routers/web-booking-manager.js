@@ -124,7 +124,7 @@ router.put(PATH + '/landlord/bookings/:id/status/:status', auth, async (req, res
 router.get(PATH + '/tenant/bookings', auth, async (req, res) => {
   const { query } = req;
   try {
-    const result = await BookingManager.findBookings(query);
+    const result = await BookingManager.findBookings(query, { notPaging: true });
     //
     res.send(result);
   } catch (error) {
