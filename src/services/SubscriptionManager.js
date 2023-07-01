@@ -5,6 +5,7 @@ const { Room } = require("../models/_Room");
 const { User } = require("../models/_User");
 const { mongoose } = require("mongoose");
 const { formatDate } = require("../utils");
+const { Package } = require("../models/_Package");
 
 this.findSubscriptions = async function (criteria, more) {
   const queryObj = {};
@@ -38,8 +39,8 @@ this.findSubscriptions = async function (criteria, more) {
   if (more && more.notPaging === true) {
     return {
       count: subscriptions.length,
-      rows: subscriptions
-    }
+      rows: subscriptions,
+    };
   }
   // pagination
   const DEFAULT_LIMIT = 6;
@@ -75,6 +76,9 @@ this.wrapExtraToSubscription = async function (subscriptionObj, more) {
   //
   const user = await User.findById(subscriptionObj.userId);
   subscriptionObj.user = lodash.pick(user, ["fullName", "email"]);
+  //
+  const package = await User.findById(subscriptionObj.packageId);
+  subscriptionObj.package = lodash.pick(package, ["name"]);
   // id
   subscriptionObj.id = lodash.get(subscriptionObj, "_id").toString();
   // Date
@@ -89,18 +93,19 @@ this.wrapExtraToSubscription = async function (subscriptionObj, more) {
   // total price
   subscriptionObj.totalPrice =
     subscriptionObj.totalPrice.toLocaleString("vi-VI");
-  if (lodash.isNumber(subscriptionObj.brokerageFee))
-    subscriptionObj.brokerageFee =
-      subscriptionObj.brokerageFee.toLocaleString("vi-VI");
   //
   return lodash.omit(subscriptionObj, ["_id"]);
 };
 
 this.createSubscription = async function (subscriptionObj, more) {
+  const { price, days } = await Package.findById(subscriptionObj.packageId);
+  // date
   subscriptionObj.beginDate = new Date();
-  if (lodash.isString(subscriptionObj.totalPrice)) {
-    subscriptionObj.totalPrice = Number(subscriptionObj.totalPrice.replaceAll(".", ""));
-  }
+  subscriptionObj.endDate = moment(subscriptionObj.beginDate)
+    .add(days, "days")
+    .toISOString();
+  //
+  subscriptionObj.totalPrice = price;
   //
   const subscription = new Subscription(subscriptionObj);
   await subscription.save();
@@ -144,14 +149,6 @@ this.switchStatusSubscription = async function (subscriptionId, status, more) {
   const subscription = await Subscription.findById(subscriptionId);
   if (!subscription) {
     throw new Error(`Not found subscription with id [${subscriptionId}]!`);
-  }
-  // Add endDate when status is SUCCESS
-  if (status === "SUCCESS") {
-    subsObj.endDate = new Date();
-    subsObj.brokerageFee = subscription.totalPrice * 0.05;
-  } else if (status === "FAIL") {
-    subsObj.endDate = new Date();
-    subsObj.brokerageFee = 0;
   }
   //
   const updatedSubscription = await Subscription.findByIdAndUpdate(

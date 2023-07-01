@@ -19,6 +19,11 @@ const subsSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
+  packageId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Package',
+    required: true,
+  },
   beginDate: {
     type: Date,
   },
@@ -29,13 +34,10 @@ const subsSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  brokerageFee: {
-    type: Number,
-  },
   status: {
     type: String,
-    enum: ['RUNNING', 'SUCCESS', 'FAIL'],
-    default: "RUNNING"
+    enum: ['READY', 'RUNNING', 'SUCCESS', 'FAIL'],
+    default: "READY"
   }
 }, {
   timestamps: true,
