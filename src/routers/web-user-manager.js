@@ -5,10 +5,11 @@ const router = new express.Router();
 const UserManager = require("../services/UserManager");
 //
 const { auth } = require("../middleware/auth");
-const { PATH } = require("../utils");
+const { PATH, PRIVATE_KEY } = require("../utils");
 const { User } = require("../models/_User");
 const { House } = require("../models/_House");
 const { Room } = require("../models/_Room");
+const { default: axios } = require("axios");
 //
 router.get(PATH + "/users", async (req, res) => {
   const { query } = req;
@@ -75,6 +76,22 @@ router.delete(PATH + "/users/:id", async (req, res) => {
     res.send(user);
   } catch (error) {
     res.status(400).send({ message: error.message });
+  }
+});
+//
+router.post(PATH + "/contact/authenticate", async (req, res) => {
+  const info = req.body;
+  console.log(info);
+
+  try {
+    const r = await axios.put(
+      "https://api.chatengine.io/users/",
+      { username: info.email, secret: info.email, first_name: info.fullName },
+      { headers: { "Private-Key": PRIVATE_KEY } }
+    );
+    return res.send(r.data);
+  } catch (e) {
+    return res.status(e.response.status).json(e.response.data);
   }
 });
 // Filter -------------------------------------------------------------------------------------------------------------------
