@@ -6,6 +6,7 @@ const { User } = require("../models/_User");
 const { mongoose } = require("mongoose");
 const { formatDate } = require("../utils");
 const { Package } = require("../models/_Package");
+const moment = require("moment");
 
 this.findSubscriptions = async function (criteria, more) {
   const queryObj = {};
@@ -77,7 +78,7 @@ this.wrapExtraToSubscription = async function (subscriptionObj, more) {
   const user = await User.findById(subscriptionObj.userId);
   subscriptionObj.user = lodash.pick(user, ["fullName", "email"]);
   //
-  const package = await User.findById(subscriptionObj.packageId);
+  const package = await Package.findById(subscriptionObj.packageId);
   subscriptionObj.package = lodash.pick(package, ["name"]);
   // id
   subscriptionObj.id = lodash.get(subscriptionObj, "_id").toString();
@@ -109,8 +110,6 @@ this.createSubscription = async function (subscriptionObj, more) {
   //
   const subscription = new Subscription(subscriptionObj);
   await subscription.save();
-  //
-  await Room.findByIdAndUpdate(subscriptionObj.roomId, { isAds: true });
   //
   return subscription;
 };
@@ -149,6 +148,14 @@ this.switchStatusSubscription = async function (subscriptionId, status, more) {
   const subscription = await Subscription.findById(subscriptionId);
   if (!subscription) {
     throw new Error(`Not found subscription with id [${subscriptionId}]!`);
+  }
+  if (status === "RUNNING") {
+    // turn on room ads
+    await Room.findByIdAndUpdate(subscription.roomId, { isAds: true });
+  }
+  if (status === "FAIL" || status === "SUCCESS") {
+    // turn off room ads
+    await Room.findByIdAndUpdate(subscription.roomId, { isAds: false });
   }
   //
   const updatedSubscription = await Subscription.findByIdAndUpdate(
